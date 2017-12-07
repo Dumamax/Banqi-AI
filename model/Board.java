@@ -1,4 +1,3 @@
-package edu.colostate.cs.cs414.banqi.model;
 import java.util.ArrayList;
 import java.util.Collections;
 

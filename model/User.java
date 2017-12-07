@@ -1,8 +1,5 @@
-package edu.colostate.cs.cs414.banqi.model;
 
 import java.util.ArrayList;
-
-import edu.colostate.cs.cs414.banqi.controller.Controller;
 
 public class User {
 	
