@@ -596,14 +596,12 @@ public class AI {
 
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
-	
-		String state = "B6D R6D R6D R3D B4D R4D B1D B2D B1D B4D R1D B1D R1D B3D R5D B5D R1U R1D R5D R7D B1D R2D B3D B2D B5U R2D B6D B7D R1D R4D B1D R3D . ";
-		
-		Game game = new Game(state);
+			
+		Game game = new Game();
 		
 		AI ai = new AI(game, Ecolor.RED);
 		
-//		String state = game.getBoard().saveBoard();
+		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);
 
 		System.out.println("\n\n");
