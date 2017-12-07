@@ -4,19 +4,20 @@ import java.util.Arrays;
 
 public class AI {
 	
-	Color color;
+
+	Ecolor color;
 	Game game;
 
 	boolean debug = false;
 
 	
-	public AI(Game game, Color color) {
+	public AI(Game game, Ecolor color) {
 		this.color = color;
 		this.game = game;
 	}
 	
 	
-	public void setColor(Color color) {
+	public void setColor(Ecolor color) {
 		this.color = color;
 	}
 	
@@ -93,19 +94,19 @@ public class AI {
 	}
 	
 	private boolean correctColor(char thisLetter, char otherLetter) {
-		Color thisColor = null;
-		Color otherColor = null;
+		Ecolor thisColor = null;
+		Ecolor otherColor = null;
 		
 		if(thisLetter == 'R') {
-			thisColor = Color.RED;
+			thisColor = Ecolor.RED;
 		}else if(thisLetter == 'B') {
-			thisColor = Color.BLACK;
+			thisColor = Ecolor.BLACK;
 		}
 		
 		if(otherLetter == 'R') {
-			otherColor = Color.RED;
+			otherColor = Ecolor.RED;
 		}else if(otherLetter == 'B') {
-			otherColor = Color.BLACK;
+			otherColor = Ecolor.BLACK;
 		}
 		
 		if(thisColor == color) {
@@ -559,12 +560,14 @@ public class AI {
 	}
 	
 	public static void main(String[] args) {
+
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
 		
+
 		Game game = new Game();
 		
-		AI ai = new AI(game, Color.RED);
+		AI ai = new AI(game, Ecolor.RED);
 		
 		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);

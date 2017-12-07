@@ -53,14 +53,14 @@ public class Board {
 		return null;
 	}
 	
-	public void createToken(Type type, Color color, int numOfTokens) {
+	public void createToken(Type type, Ecolor color, int numOfTokens) {
 		for(int i=0; i<numOfTokens; i++) {
 			tokens.add(new Token(type, color));
 		}
 	}
 	
-	public void createTokenSet(Color _color) {
-		Color color = _color;
+	public void createTokenSet(Ecolor _color) {
+		Ecolor color = _color;
 		Type type = Type.GENERAL;
 		createToken(type, color, 1);
 		type = Type.ADVISOR;
@@ -78,8 +78,8 @@ public class Board {
 	}
 	
 	public void createAllTokens() {
-		createTokenSet(Color.RED);
-		createTokenSet(Color.BLACK);
+		createTokenSet(Ecolor.RED);
+		createTokenSet(Ecolor.BLACK);
 	}
 	
 	public void createTiles() {
@@ -159,7 +159,7 @@ public class Board {
 		String[] graveyardSplit = string.split("\\.");
 		String[] graveyardString = graveyardSplit[1].split(" ");
 		String[] split = graveyardSplit[0].split(" ");
-		Color color;
+		Ecolor color;
 		Type type;
 		boolean isFaceUp;
 		Token token;
@@ -174,8 +174,8 @@ public class Board {
 			}
 			
 			if(split[i].charAt(0) == 'B') {
-				color = Color.BLACK;
-			}else color = Color.RED;
+				color = Ecolor.BLACK;
+			}else color = Ecolor.RED;
 			
 			int temp = split[i].charAt(1);
 			switch(temp) {
