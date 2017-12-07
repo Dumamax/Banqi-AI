@@ -47,7 +47,7 @@ public class Start {
 		
 		
 		
-		String[] box1 = {"Me","Negamax","Q-Table"};
+		String[] box1 = {"Negamax","Q-Table","Me"};
 		String[] box2 = {"Negamax","Q-Table"};
 		
 		JComboBox Player1 = new JComboBox(box1);
@@ -62,11 +62,11 @@ public class Start {
 		btnStartGame.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				//Start game
-				String leftBox = (String) Player1.getSelectedItem();
-				String rightBox = (String) Player2.getSelectedItem();
+				int leftBox = Player1.getSelectedIndex();
+				int rightBox = Player2.getSelectedIndex();
 				
 				System.out.println(leftBox+" vs. "+rightBox);
-				
+				GameBoard.main(Player1.getSelectedIndex(), Player2.getSelectedIndex());
 				
 				
 			}

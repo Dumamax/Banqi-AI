@@ -411,7 +411,7 @@ public class AI {
 	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
 		int score = -1000;
 		int[] move = new int[4];
-		int[][] output = new int[1][4];
+		int[][] output = new int[2][4];
 		
 		if(game.isOver() || depthLeft == 0) {
 			score = calculateScore(color, state);
