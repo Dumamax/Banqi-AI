@@ -27,6 +27,9 @@ public class GameBoard {
 	private String user;
 	private AI aiPlayer;
 	
+	private static int P1;
+	private static int P2;
+	
 	private int posX;
 	private int posY;
 	private static boolean testing= false;
@@ -34,6 +37,34 @@ public class GameBoard {
 	
 	//testing AI main
 	public static void main(String[] args) {
+		Game aiGame= new Game();
+		String tUser = "Tester";
+		aiGame.setPlayers(tUser, "AI");
+		aiGame.setCreatorColor(Ecolor.RED);
+		aiGame.setCurrentColor(Ecolor.RED);
+		aiGame.setCurrentPlayer(tUser);
+		aiGame.setGameID("AI");
+		
+		testing = true;
+		
+		
+		
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					GameBoard window = new GameBoard(aiGame, tUser);
+					window.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+	
+	public static void main(int p1, int p2) {
+		P1=p1;
+		P2=p2;
+		
 		Game aiGame= new Game();
 		String tUser = "Tester";
 		aiGame.setPlayers(tUser, "AI");
@@ -111,6 +142,7 @@ public class GameBoard {
 		this.posY=y;
 		initialize();
 	}
+	
 	
 
 	/**
@@ -193,7 +225,7 @@ public class GameBoard {
 					String gameState = game.getBoard().saveBoard();//This is where it gets an active game state, this will throw errors when using the AI test board
 					ArrayList<int[][]> moveArray = aiPlayer.validMoves(gameState);
 					aiPlayer.printBoard(gameState);
-					int[] bestMove = aiPlayer.pickBestMove(moveArray, gameState);
+					int[] bestMove = aiPlayer.negamax(gameState, 10);
 					game.moveToken("AI", bestMove[0], bestMove[1], bestMove[2], bestMove[3]);
 					
 					//board gets refreshed
