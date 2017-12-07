@@ -366,7 +366,7 @@ public class AI {
 	public int[] negamax(String state, int depthLimit){
 		Double alpha = Double.NEGATIVE_INFINITY;
 		Double beta = Double.POSITIVE_INFINITY;
-		int bestScore = -100;
+		int bestScore = -1000;
 		int[] bestMove = new int[]{-1, -1, -1, -1};
 		
 		for (int depth=0; depth<depthLimit; depth++) {
@@ -375,7 +375,7 @@ public class AI {
 			int score = output[0][0];
 			int[] move = output[1];
 			
-			if(bestScore == -100 || score > bestScore) {
+			if(bestScore == -1000 || score > bestScore) {
 				bestScore = score;
 				bestMove = move;
 				if(game.isOver()) {
@@ -387,7 +387,7 @@ public class AI {
 	}
 	
 	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
-		int score = -100;
+		int score = -1000;
 		int[] move = null;
 		int[][] output;
 		
@@ -398,7 +398,7 @@ public class AI {
 			return output;
 		}
 		
-		int bestScore = -100;
+		int bestScore = -1000;
 		int[] bestMove = null;
 		int[][] allMoves = compileMoves(validMoves(state));
 		
@@ -408,11 +408,11 @@ public class AI {
 			output = negamaxHelper(newState, depthLeft-1, -beta, -alpha);
 			score = output[0][0];
 			move = output[1];
-			if(score == -100) {
+			if(score == -1000) {
 				continue;
 			}
 			score = -score;
-			if(bestScore == -100 || score > bestScore) {
+			if(bestScore == -1000 || score > bestScore) {
 				bestScore = score;
 				bestMove = move;
 			}
