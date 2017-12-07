@@ -5,7 +5,7 @@ import java.util.Arrays;
 public class AI {
 	
 	Color color;
-	boolean debug = true;
+	boolean debug = false;
 	
 	public AI(Color color) {
 		this.color = color;
@@ -342,20 +342,25 @@ public class AI {
 		String[] field = state.split(" . ")[0].split(" ");
 		String graveyard = state.split(" . ")[1];
 		int indexFirst = getIndex(move[0], move[1]);
-		char firstColor = field[indexFirst].charAt(0);
 		int indexSecond = getIndex(move[2], move[3]);
-		char secondColor = field[indexSecond].charAt(0);
 		//make a newState
 		String newState = "";
-		//replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
-		//...and then replace the token at (move[0], move[1]) with XXX
-		field[indexSecond] = field[indexFirst];
-		field[indexFirst] = "XXX";
+		
+		if(move[0] == move[2] && move[1] == move[3]) {
+			//we are flipping, not moving
+			field[indexFirst] = field[indexFirst].substring(0, 2) + "U";
+		}else {
+			//replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
+			//...and then replace the token at (move[0], move[1]) with XXX
+			field[indexSecond] = field[indexFirst];
+			field[indexFirst] = "XXX";
+		}
+		
 		//set everything up
 		for(String token : field) {
 			newState += token + " ";
 		}
-		newState += graveyard;
+		newState += " . " + graveyard;
 		//then return the newState onto which that move was made
 		return newState;
 	}
@@ -369,7 +374,7 @@ public class AI {
 	public Integer calculateScore(Color playerColor, String state) {
 		return null;
 	}
-	
+		
 	public void printBoard(String state) {
 		String[] splitState = state.split(" . ");
 		String field_raw = splitState[0];
@@ -387,17 +392,22 @@ public class AI {
 	}
 	
 	public static void main(String[] args) {
-		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
 		AI ai = new AI(Color.RED);
-		ArrayList<int[][]> allOptions = ai.validMoves(state);
 		
-		for(int[] moveSet) {
+		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
+		for(int c=0;c<=100;c++) {
+			ArrayList<int[][]> moves = ai.validMoves(state);
+			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
 			
+			while(chosenMoves.length < 0) {
+				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+			}
+			
+			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
+			ai.printBoard("State:\n" + state);
+			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
+			state = ai.makeMove(chosenMove, state);
 		}
 		
-		int[] bestMove = ai.pickBestMove(allOptions, state);
-		System.out.println("Best Move:");
-		System.out.println("[" + bestMove[0] + "," + bestMove[1] + " | " + bestMove[2] + "," + bestMove[3] + "]");
-		ai.printBoard(state);
 	}
 }
