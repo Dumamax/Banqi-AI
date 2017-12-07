@@ -406,7 +406,7 @@ public class AI {
 			}
 		}
 		int[][] flips = validMoves(state).get(1);
-		if(bestMove == null || (bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0)) {
+		if(flips.length > 0 && (bestMove == null || (bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0))) {
 			bestMove = flips[new Random().nextInt(flips.length)];
 		}
 		return bestMove;
@@ -595,6 +595,17 @@ public class AI {
 //			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
 			
 			int[] chosenMove = ai.negamax(state, 4);
+			
+			int depthLimit = 5;
+			while(chosenMove[0] == 0 && chosenMove[1] == 0 && chosenMove[2] == 0 && chosenMove[3] == 0) {
+				System.out.println("Now trying with a depth limit of " + depthLimit + " for player " + ai.getColor());
+				chosenMove = ai.negamax(state, depthLimit);
+				depthLimit++;
+			}
+			
+			while(chosenMove[0] == 0) {
+				
+			}
 			
 			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
 			
