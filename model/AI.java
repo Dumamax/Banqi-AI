@@ -387,7 +387,68 @@ public class AI {
 	}
 	
 	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
+		int score = -100;
+		int[] move = null;
+		int[][] output;
 		
+		if(game.isOver() || depthLeft == 0) {
+			score = calculateScore(state);
+			output[0][0] = score;
+			output[1] = move;
+			return output;
+		}
+		
+		int bestScore = -100;
+		int[] bestMove = null;
+		int[][] allMoves = compileMoves(validMoves(state));
+		
+		for(int i=0; i<allMoves.length; i++) {
+			String newState = makeMove(allMoves[i], state);
+			
+			output = negamaxHelper(newState, depthLeft-1, -beta, -alpha);
+			score = output[0][0];
+			move = output[1];
+			if(score == -100) {
+				continue;
+			}
+			score = -score;
+			if(bestScore == -100 || score > bestScore) {
+				bestScore = score;
+				bestMove = move;
+			}
+			if(bestScore > alpha) {
+				alpha = (double) bestScore;
+			}
+			if(bestScore >= beta) {
+				break;
+			}
+		}
+		output[0][0] = bestScore;
+		output[1] = bestMove;
+	}
+	
+	private int[][] compileMoves(ArrayList<int[][]> validMoves){
+		int length = 0;
+		length += validMoves.get(0).length;
+		length += validMoves.get(1).length;
+		length += validMoves.get(2).length;
+		
+		int[][] allMoves = new int[length][4];
+		int x = 0;
+		for(int i=0; i<validMoves.get(0).length; i++) {
+			allMoves[x] = validMoves.get(0)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(1).length; i++) {
+			allMoves[x] = validMoves.get(1)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(2).length; i++) {
+			allMoves[x] = validMoves.get(2)[i];
+			x++;
+		}
+		
+		return allMoves;
 	}
 	
 	public int[] pickBestMove(ArrayList<int[][]> allOptions, String state) {
