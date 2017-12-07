@@ -16,6 +16,10 @@ public class AI {
 		this.color = color;
 	}
 	
+	public Color getColor() {
+		return color;
+	}
+	
 	/**
 	 * This is the opposite method to getXY. It takes some XY and converts it to the indices needed for field.
 	 * @param x
@@ -339,10 +343,20 @@ public class AI {
 	 * @return null if the move was not valid, the new state created otherwise.
 	 */
 	public String makeMove(int[] move, String state) {	
-		String[] field = state.split(" . ")[0].split(" ");
-		String graveyard = state.split(" . ")[1];
+		String[] stateSplit = state.split(" . ");
+		String[] field = null;
+		String graveyard = null;
+
+		if(stateSplit.length == 2) {
+			field = stateSplit[0].split(" ");
+			graveyard = stateSplit[1];
+		}else {
+			field = stateSplit[0].split(" ");
+			graveyard = "";
+		}
 		int indexFirst = getIndex(move[0], move[1]);
 		int indexSecond = getIndex(move[2], move[3]);
+		
 		//make a newState
 		String newState = "";
 		
@@ -372,7 +386,66 @@ public class AI {
 	 * @return the score of the board for some playerColor. The higher the score, the better the board state is for that player.
 	 */
 	public Integer calculateScore(Color playerColor, String state) {
-		return null;
+		char color = 'R';
+		if(playerColor == Color.BLACK) {
+			color = 'B';
+		}
+		
+		//the score is the addition of all of the power levels of my tokens and the subtraction of all of the power levels of his tokens
+		String field = state.split(" . ")[0];
+		
+		Integer score = 0;
+		
+		int mySoldierCounter = 0;
+		int hisSoldierCounter = 0;
+		int myGeneralCounter = 0;
+		int hisGeneralCounter = 0;
+		
+		for(String token : field.split(" ")) {
+			//add to score the power level of my tokens
+			
+			if(token.equals("XXX")) {
+				continue;
+			}
+			
+			if(token.charAt(0) == color) {
+				score += Character.getNumericValue(token.charAt(1));
+			}
+			//subtract from score the power level of his tokens
+			if(token.charAt(0) != color) {
+				score -= Character.getNumericValue(token.charAt(1));
+			}
+			
+			//for each cannon of mine, increase my score and for each cannon of my opponent, decrease my score
+			if(token.charAt(1) == '2' && token.charAt(0) == color) {
+				score += 6;
+			}else if(token.charAt(1) == '2' && token.charAt(0) != color) {
+				score -= 6;
+			}
+			
+			if(token.charAt(1) == '1' && token.charAt(0) == color) {
+				mySoldierCounter++;
+			}else if(token.charAt(1) == '1' && token.charAt(0) != color) {
+				hisSoldierCounter++;
+			}
+			
+			if(token.charAt(1) == '7' && token.charAt(0) == color) {
+				myGeneralCounter++;
+			}else if(token.charAt(1) == '7' && token.charAt(0) != color) {
+				hisGeneralCounter++;
+			}
+		}
+
+		//if I  have as many or more soldiers than he does generals, increase my score
+		if(mySoldierCounter >= hisGeneralCounter) {
+			score += 15;
+		}
+		//if he has as many or more soldiers than i have generals, decrease my score
+		if(hisSoldierCounter >= myGeneralCounter) {
+			score -= 15;
+		}
+		
+		return score;
 	}
 		
 	public void printBoard(String state) {
@@ -392,22 +465,86 @@ public class AI {
 	}
 	
 	public static void main(String[] args) {
+		ArrayList<Integer> blackScores = new ArrayList<Integer>();
+		ArrayList<Integer> redScores = new ArrayList<Integer>();
+		
 		AI ai = new AI(Color.RED);
 		
-		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
-		for(int c=0;c<=100;c++) {
+		String state = new Game().getBoard().saveBoard();
+		ai.printBoard("State:\n" + state);
+		
+		System.out.println("\n\n");
+		
+		int moveCounter = 0;
+		while(state.split(" . ")[0].contains("R") && state.split(" . ")[0].contains("B")) {
 			ArrayList<int[][]> moves = ai.validMoves(state);
 			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
-			
-			while(chosenMoves.length < 0) {
+						
+			while(chosenMoves.length <= 0) {
+				moves.remove(chosenMoves);
 				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
 			}
 			
 			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
-			ai.printBoard("State:\n" + state);
+			
 			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
+			
 			state = ai.makeMove(chosenMove, state);
+			
+			ai.printBoard("State:\n" + state);
+			System.out.println("Value for Red: " + ai.calculateScore(Color.RED, state));
+			redScores.add(ai.calculateScore(Color.RED, state));
+			System.out.println("Value for Black: " + ai.calculateScore(Color.BLACK, state));
+			blackScores.add(ai.calculateScore(Color.BLACK, state));
+			
+			moveCounter++;
+			
+			System.out.println("\n\n");
+			
+			if(ai.getColor() == Color.RED) {
+				ai.setColor(Color.BLACK);
+			}else {
+				ai.setColor(Color.RED);
+			}
 		}
+		
+		String victor = "black";
+		if(state.split(" . ")[0].contains("R")) {
+			victor = "red";
+		}
+		
+		System.out.println("With " + moveCounter + " moves, " + victor + " is the victor!");
+		
+		ArrayList<Integer> newRedScores = new ArrayList<Integer>(redScores);
+		Integer lastScore = null;
+		for(Integer score : redScores) {
+			if(lastScore == null) {
+				lastScore = score;
+				continue;
+			}else {
+				if(lastScore == score) {
+					newRedScores.remove(lastScore);
+				}
+				lastScore = score;
+			}
+		}
+		
+		ArrayList<Integer> newBlackScores = new ArrayList<Integer>(blackScores);
+		lastScore = null;
+		for(Integer score : blackScores) {
+			if(lastScore == null) {
+				lastScore = score;
+				continue;
+			}else {
+				if(lastScore == score) {
+					newBlackScores.remove(lastScore);
+				}
+				lastScore = score;
+			}
+		}
+		
+		System.out.println("Red Scores:   " + newRedScores.toString());
+		System.out.println("Black Scores: " + newBlackScores.toString());
 		
 	}
 }
