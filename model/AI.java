@@ -15,30 +15,6 @@ public class AI {
 	}
 	
 	
-	
-	public int[] makeFirstMove_temp(String state) {
-		Random random = new Random();
-		
-		int randomX2;
-		int randomY2;
-		int randomX1;
-		int randomY1;
-		do{
-		randomX1 = random.nextInt(8 + 1 - 1) + 1;
-		int deltaX = random.nextInt(1 + 1 - -1) + -1;
-		randomY1 = random.nextInt(4 + 1 - 1) + 1;
-		int deltaY = random.nextInt(1 + 1 - -1) + -1;
-		randomX2 = randomX1 + deltaX;
-		randomY2 = randomY1 + deltaY;
-		
-		}while((randomX2>=1&&randomX2<=8)&&(randomY2>=1&&randomY2<=4));
-		
-		
-		
-		
-		return new int[]{randomX1, randomY1, randomX2, randomY2};
-	}
-	
 	public void setColor(Color color) {
 		this.color = color;
 	}
@@ -366,124 +342,129 @@ public class AI {
 	 * @return null if the move was not valid, the new state created otherwise.
 	 */
 	public String makeMove(int[] move, String state) {
+//		String[] field = state.split(" . ")[0].split(" ");
+//		String graveyard = state.split(" . ")[1];
+//		int indexFirst = getIndex(move[0], move[1]);
+//		char firstColor = field[indexFirst].charAt(0);
+//		int indexSecond = getIndex(move[2], move[3]);
+//		char secondColor = field[indexSecond].charAt(0);
+//		//first check that the piece at (move[0], move[1]) exists & is face up
+//		if(field[indexFirst].equals("XXX") || field[indexFirst].charAt(2) == 'D') {
+//			return null;
+//		}
+//		
+//		//if we are moving into an empty space, just make the move and return appropriately
+//		if(field[indexSecond].equals("XXX")) {
+//			field[indexSecond] = field[indexFirst];
+//			field[indexFirst] = "XXX";
+//			String newState = "";
+//			for(String token : field) {
+//				newState += token + " ";
+//			}
+//			newState += graveyard;
+//			return newState;
+//		}
+//		
+//		//otherwise, check that the piece at (move[2], move[3]) either doesn't exist, or exists & is face up & is a different color than the piece at (move[0], move[1])
+//		if(field[indexSecond].charAt(2) == 'D' || firstColor == secondColor) {
+//			return null;
+//		}
+//		
+//		//check the first piece - if it is a cannon:
+//		if(field[indexFirst].charAt(1) == '2') {
+//		//cannon can only hop if there is one token (not one tile) between the pieces
+//			//so, first token and second token must share either an X value or a Y value
+//			boolean shareYs = false;
+//			boolean shareXs = false;
+//			if(move[0] == move[2]) {
+//				shareXs = true;
+//			}
+//			if(move[1] == move[3]) {
+//				shareYs = true;
+//			}
+//			//then, for all tokens at the X/Y values in between, there must be ONLY ONE that is XXX
+//			if(!shareXs && shareYs) {
+//				//from the lowest x to the greatest x, all tokens should be XXX except one - if there is not exactly one, return null
+//				int x = -1;
+//				int otherX = -1;
+//				if(move[0] > move[2]) {
+//					x= move[0];
+//					otherX = move[2];
+//				}else {
+//					x = move[2];
+//					otherX = move[0];
+//				}
+//				int y = move[1];
+//				
+//				boolean singleToken = false;
+//				while(x > otherX) {
+//					if(!field[getIndex(x,y)].equals("XXX")) {
+//						if(singleToken) {
+//							return null;
+//						}else {
+//							singleToken = true;
+//						}
+//					}
+//					x++;
+//				}
+//			}else if(shareXs && !shareYs) {
+//				//from the lowest y to the greatest y, all tokens should be XXX except one - if there is not exactly one, return null
+//				int y = -1;
+//				int otherY = -1;
+//				if(move[1] > move[3]) {
+//					y = move[1];
+//					otherY = move[3];
+//				}else {
+//					y = move[3];
+//					otherY = move[1];
+//				}
+//				int x = move[0];
+//				
+//				boolean singleToken = false;
+//				while(y > otherY) {
+//					if(!field[getIndex(x,y)].equals("XXX")) {
+//						if(singleToken) {
+//							return null;
+//						}else {
+//							singleToken = true;
+//						}
+//					}
+//					y++;
+//				}
+//			}else {
+//				return null;
+//			}
+//		}
+//		//otherwise, make sure that the tokens are within 1 space of each other
+//		int firstX = move[0];
+//		int firstY = move[1];
+//		int secondX = move[2];
+//		int secondY = move[3];
+//		if(!(Math.abs(firstX - secondX) == 1 || Math.abs(firstY - secondY) == 1)) {
+//			return null;
+//		}
+//				
+//		//otherwise, check that the first token is of a higher rank than the second token (unless it is a cannon)
+//		if(!(field[indexFirst].charAt(1) == '2')) {//if it is not a cannon
+//			if(field[indexFirst].charAt(1) == '7' && field[indexSecond].charAt(1) == '1') {//if the first token is a general and the second token is a soldier than it cannot take it
+//				return null;
+//			}else if(field[indexSecond].charAt(1) == '7' && field[indexFirst].charAt(1) == '1') {//if the first token is a soldier and the second token is a general than it can take it
+//				//do nothing
+//			}else if((int) field[indexFirst].charAt(1) > (int) field[indexSecond].charAt(1)) {//check to make the first token has a higher rank
+//				//do nothing
+//			}else {
+//				return null;
+//			}
+//		}			
 		String[] field = state.split(" . ")[0].split(" ");
 		String graveyard = state.split(" . ")[1];
 		int indexFirst = getIndex(move[0], move[1]);
 		char firstColor = field[indexFirst].charAt(0);
 		int indexSecond = getIndex(move[2], move[3]);
 		char secondColor = field[indexSecond].charAt(0);
-		//first check that the piece at (move[0], move[1]) exists & is face up
-		if(field[indexFirst].equals("XXX") || field[indexFirst].charAt(2) == 'D') {
-			return null;
-		}
-		
-		//if we are moving into an empty space, just make the move and return appropriately
-		if(field[indexSecond].equals("XXX")) {
-			field[indexSecond] = field[indexFirst];
-			field[indexFirst] = "XXX";
-			String newState = "";
-			for(String token : field) {
-				newState += token + " ";
-			}
-			newState += graveyard;
-			return newState;
-		}
-		
-		//otherwise, check that the piece at (move[2], move[3]) either doesn't exist, or exists & is face up & is a different color than the piece at (move[0], move[1])
-		if(field[indexSecond].charAt(2) == 'D' || firstColor == secondColor) {
-			return null;
-		}
-		
-		//check the first piece - if it is a cannon:
-		if(field[indexFirst].charAt(1) == '2') {
-		//cannon can only hop if there is one token (not one tile) between the pieces
-			//so, first token and second token must share either an X value or a Y value
-			boolean shareYs = false;
-			boolean shareXs = false;
-			if(move[0] == move[2]) {
-				shareXs = true;
-			}
-			if(move[1] == move[3]) {
-				shareYs = true;
-			}
-			//then, for all tokens at the X/Y values in between, there must be ONLY ONE that is XXX
-			if(!shareXs && shareYs) {
-				//from the lowest x to the greatest x, all tokens should be XXX except one - if there is not exactly one, return null
-				int x = -1;
-				int otherX = -1;
-				if(move[0] > move[2]) {
-					x= move[0];
-					otherX = move[2];
-				}else {
-					x = move[2];
-					otherX = move[0];
-				}
-				int y = move[1];
-				
-				boolean singleToken = false;
-				while(x > otherX) {
-					if(!field[getIndex(x,y)].equals("XXX")) {
-						if(singleToken) {
-							return null;
-						}else {
-							singleToken = true;
-						}
-					}
-					x++;
-				}
-			}else if(shareXs && !shareYs) {
-				//from the lowest y to the greatest y, all tokens should be XXX except one - if there is not exactly one, return null
-				int y = -1;
-				int otherY = -1;
-				if(move[1] > move[3]) {
-					y = move[1];
-					otherY = move[3];
-				}else {
-					y = move[3];
-					otherY = move[1];
-				}
-				int x = move[0];
-				
-				boolean singleToken = false;
-				while(y > otherY) {
-					if(!field[getIndex(x,y)].equals("XXX")) {
-						if(singleToken) {
-							return null;
-						}else {
-							singleToken = true;
-						}
-					}
-					y++;
-				}
-			}else {
-				return null;
-			}
-		}
-		//otherwise, make sure that the tokens are within 1 space of each other
-		int firstX = move[0];
-		int firstY = move[1];
-		int secondX = move[2];
-		int secondY = move[3];
-		if(!(Math.abs(firstX - secondX) == 1 || Math.abs(firstY - secondY) == 1)) {
-			return null;
-		}
-				
-		//otherwise, check that the first token is of a higher rank than the second token (unless it is a cannon)
-		if(!(field[indexFirst].charAt(1) == '2')) {//if it is not a cannon
-			if(field[indexFirst].charAt(1) == '7' && field[indexSecond].charAt(1) == '1') {//if the first token is a general and the second token is a soldier than it cannot take it
-				return null;
-			}else if(field[indexSecond].charAt(1) == '7' && field[indexFirst].charAt(1) == '1') {//if the first token is a soldier and the second token is a general than it can take it
-				//do nothing
-			}else if((int) field[indexFirst].charAt(1) > (int) field[indexSecond].charAt(1)) {//check to make the first token has a higher rank
-				//do nothing
-			}else {
-				return null;
-			}
-		}
-					
 		//make a newState
 		String newState = "";
-		//if we still haven't returned null (meaning the move is a valid one), replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
+		//replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
 		//...and then replace the token at (move[0], move[1]) with XXX
 		field[indexSecond] = field[indexFirst];
 		field[indexFirst] = "XXX";
