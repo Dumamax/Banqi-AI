@@ -562,24 +562,28 @@ public class AI {
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
 		
-		AI ai = new AI(null, Color.RED);
+		Game game = new Game();
 		
-		String state = new Game().getBoard().saveBoard();
+		AI ai = new AI(game, Color.RED);
+		
+		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);
-		
+
 		System.out.println("\n\n");
 		
 		int moveCounter = 0;
 		while(state.split(" . ")[0].contains("R") && state.split(" . ")[0].contains("B")) {
-			ArrayList<int[][]> moves = ai.validMoves(state);
-			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
-						
-			while(chosenMoves.length <= 0) {
-				moves.remove(chosenMoves);
-				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
-			}
+//			ArrayList<int[][]> moves = ai.validMoves(state);
+//			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+//						
+//			while(chosenMoves.length <= 0) {
+//				moves.remove(chosenMoves);
+//				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+//			}
+//			
+//			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
 			
-			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
+			int[] chosenMove = ai.negamax(state, 5);
 			
 			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
 			
