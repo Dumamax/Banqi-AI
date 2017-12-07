@@ -21,7 +21,7 @@ public class AI {
 		this.color = color;
 	}
 	
-	public Color getColor() {
+	public Ecolor getColor() {
 		return color;
 	}
 	
@@ -480,9 +480,9 @@ public class AI {
 	 * @param state The state of the board (including Field & Graveyard).
 	 * @return the score of the board for some playerColor. The higher the score, the better the board state is for that player.
 	 */
-	public Integer calculateScore(Color playerColor, String state) {
+	public Integer calculateScore(Ecolor playerColor, String state) {
 		char color = 'R';
-		if(playerColor == Color.BLACK) {
+		if(playerColor == Ecolor.BLACK) {
 			color = 'B';
 		}
 		
@@ -593,19 +593,19 @@ public class AI {
 			state = ai.makeMove(chosenMove, state);
 			
 			ai.printBoard("State:\n" + state);
-			System.out.println("Value for Red: " + ai.calculateScore(Color.RED, state));
-			redScores.add(ai.calculateScore(Color.RED, state));
-			System.out.println("Value for Black: " + ai.calculateScore(Color.BLACK, state));
-			blackScores.add(ai.calculateScore(Color.BLACK, state));
+			System.out.println("Value for Red: " + ai.calculateScore(Ecolor.RED, state));
+			redScores.add(ai.calculateScore(Ecolor.RED, state));
+			System.out.println("Value for Black: " + ai.calculateScore(Ecolor.BLACK, state));
+			blackScores.add(ai.calculateScore(Ecolor.BLACK, state));
 			
 			moveCounter++;
 			
 			System.out.println("\n\n");
 			
-			if(ai.getColor() == Color.RED) {
-				ai.setColor(Color.BLACK);
+			if(ai.getColor() == Ecolor.RED) {
+				ai.setColor(Ecolor.BLACK);
 			}else {
-				ai.setColor(Color.RED);
+				ai.setColor(Ecolor.RED);
 			}
 		}
 		

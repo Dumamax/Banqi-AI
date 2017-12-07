@@ -118,7 +118,7 @@ public class GameBoard {
 	 */
 	private void initialize() {
 		if(game.getGameID().equals("AI")){
-			aiPlayer = new AI(Ecolor.BLACK);
+			aiPlayer = new AI(game,Ecolor.BLACK);
 		}
 		frame = new JFrame(game.toString()+"---You are "+game.getPlayerColor(user)+isMyTurn());
 		frame.setBounds(posX, posY, 850, 939);
