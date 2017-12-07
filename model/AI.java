@@ -4,15 +4,15 @@ import java.util.Arrays;
 
 public class AI {
 	
-	Color color;
+	Ecolor color;
 	boolean debug = true;
 	
-	public AI(Color color) {
+	public AI(Ecolor color) {
 		this.color = color;
 	}
 	
 	
-	public void setColor(Color color) {
+	public void setColor(Ecolor color) {
 		this.color = color;
 	}
 	
@@ -85,19 +85,19 @@ public class AI {
 	}
 	
 	private boolean correctColor(char thisLetter, char otherLetter) {
-		Color thisColor = null;
-		Color otherColor = null;
+		Ecolor thisColor = null;
+		Ecolor otherColor = null;
 		
 		if(thisLetter == 'R') {
-			thisColor = Color.RED;
+			thisColor = Ecolor.RED;
 		}else if(thisLetter == 'B') {
-			thisColor = Color.BLACK;
+			thisColor = Ecolor.BLACK;
 		}
 		
 		if(otherLetter == 'R') {
-			otherColor = Color.RED;
+			otherColor = Ecolor.RED;
 		}else if(otherLetter == 'B') {
-			otherColor = Color.BLACK;
+			otherColor = Ecolor.BLACK;
 		}
 		
 		if(thisColor == color) {
@@ -439,7 +439,7 @@ public class AI {
 	public static void main(String[] args) {
 		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
 		//String state = "B1U XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX . ";
-		AI ai = new AI(Color.RED);
+		AI ai = new AI(Ecolor.RED);
 		ArrayList<int[][]> allOptions = ai.validMoves(state);
 		
 		int[] bestMove = ai.pickBestMove(allOptions, state);

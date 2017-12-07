@@ -4,12 +4,12 @@ import java.util.Arrays;
 public class Game {
 
 	private Status status;
-	private Color winningColor;
+	private Ecolor winningColor;
 	private String winningPlayer;
 	private String losingPlayer;
 	private String currentPlayer;
-	private Color currentColor;
-	private Color creatorColor;
+	private Ecolor currentColor;
+	private Ecolor creatorColor;
 	private ArrayList<String> players;
 	private Board board;
     private String gameID;
@@ -29,18 +29,18 @@ public class Game {
 	}
 	
 	public String getCreatorColorAsString() {
-		if(getCreatorColor() == Color.RED) {
+		if(getCreatorColor() == Ecolor.RED) {
 			return "R";
 		}else {
 			return "B";
 		}
 	}
 	
-	public Color getCreatorColor() {
+	public Ecolor getCreatorColor() {
 		return creatorColor;
 	}
 	
-	public void setCreatorColor(Color color) {
+	public void setCreatorColor(Ecolor color) {
 		creatorColor = color;
 	}
 	
@@ -60,11 +60,11 @@ public class Game {
 		currentPlayer = player;
 	}
 	
-	public Color getCurrentColor() {
+	public Ecolor getCurrentColor() {
 		return currentColor;
 	}
 	
-	public void setCurrentColor(Color color) {
+	public void setCurrentColor(Ecolor color) {
 		currentColor = color;
 	}
 	
@@ -94,7 +94,7 @@ public class Game {
         return losingPlayer;
     }    
 
-	public Color getWinningColor() {
+	public Ecolor getWinningColor() {
 		return winningColor;
 	}
     
@@ -121,10 +121,10 @@ public class Game {
 	}
 	
 	public void switchColor() {
-		if(currentColor == Color.RED) {
-			currentColor = Color.BLACK;
-		}else if(currentColor == Color.BLACK) {
-			currentColor = Color.RED;
+		if(currentColor == Ecolor.RED) {
+			currentColor = Ecolor.BLACK;
+		}else if(currentColor == Ecolor.BLACK) {
+			currentColor = Ecolor.RED;
 		}
 	}
 	
@@ -272,7 +272,7 @@ public class Game {
 	public boolean isOver() {
 		String state = board.saveBoard();
 		boolean output = false;
-		Color winningColor = null;
+		Ecolor winningColor = null;
 		
 		String[] split = state.split("\\.");
 		
@@ -283,11 +283,11 @@ public class Game {
 		
 		if(!board.contains("R")) {
 			//no red pieces, black wins
-			winningColor = Color.RED;
+			winningColor = Ecolor.RED;
 			output = true;
 		}else if(!board.contains("B")) {
 			//no black pieces, red wins
-			winningColor = Color.BLACK;
+			winningColor = Ecolor.BLACK;
 			output = true;
 		}else {
 			//there are both black and red pieces, game is not over
@@ -302,9 +302,9 @@ public class Game {
 			}
 		}
 		
-		Color colorOfWinningMove = Color.BLACK;
-		if(currentColor == Color.BLACK) {
-			colorOfWinningMove = Color.RED;
+		Ecolor colorOfWinningMove = Ecolor.BLACK;
+		if(currentColor == Ecolor.BLACK) {
+			colorOfWinningMove = Ecolor.RED;
 		}
 		
 		//currentPlayer is winner if currentColor = winningColor
@@ -355,10 +355,10 @@ public class Game {
 	
 	public String getBoardWithColor() {
 		String output = board.saveBoard();
-		if(currentColor == Color.RED) {
+		if(currentColor == Ecolor.RED) {
 			output += ". R";
 		}
-		else if(currentColor == Color.BLACK) {
+		else if(currentColor == Ecolor.BLACK) {
 			output += ". B";
 		}else System.err.println("Problem getting currentColor!");
 		
@@ -370,11 +370,11 @@ public class Game {
 		System.out.println(string.substring(0, string.length()-3));
 		if(string.charAt(string.length()-1) == 'R') {
 			System.out.println("SETTING CURRENT PLAYER AS RED");
-			currentColor = Color.RED;
+			currentColor = Ecolor.RED;
 			board.loadBoard(string.substring(0, string.length()-3));
 		}else if(string.charAt(string.length()-1) == 'B') {
 			System.out.println("SETTING CURRENT PLAYER AS BLACK");
-			currentColor = Color.BLACK;
+			currentColor = Ecolor.BLACK;
 			board.loadBoard(string.substring(0, string.length()-3));
 		}else {
 			System.out.println("SHOULDN'T EVER BE HERE");
@@ -383,5 +383,17 @@ public class Game {
 	
 	public String toString(){
 		return players.get(0)+" vs. "+players.get(1);
+	}
+
+	public Ecolor getPlayerColor(String player){
+		
+		if(player.equals(currentPlayer)){
+			return currentColor;
+		}else if(currentColor==Ecolor.RED){
+			return Ecolor.BLACK;
+		}else{
+			return Ecolor.RED;
+		}
+		
 	}
 }
