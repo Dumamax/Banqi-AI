@@ -405,9 +405,19 @@ public class AI {
 				}
 			}
 		}
+		
+		//looks at the value of each state made by using each of the flips, choosing the flip that leads to the highest scoring state
 		int[][] flips = validMoves(state).get(1);
 		if(flips.length > 0 && (bestMove == null || (bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0))) {
-			bestMove = flips[new Random().nextInt(flips.length)];
+			bestMove = flips[0];
+			bestScore = 0;
+			for(int[] flip : flips) {
+				int tempScore = calculateScore(getColor(), makeMove(flip, state));
+				if(tempScore > bestScore) {
+					bestScore = tempScore;
+					bestMove = flip;
+				}
+			}
 		}
 		
 		if(bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0) {
@@ -542,6 +552,16 @@ public class AI {
 			}else if(token.charAt(1) == '7' && token.charAt(0) != color) {
 				hisGeneralCounter++;
 			}
+			
+			//face up tokens of mine are more valuable than face down tokens of mine
+			if(token.charAt(2) == 'U' && token.charAt(0) == color) {
+				score++;
+			}
+			
+			//face up tokens of my opponents is a bad thing
+			if(token.charAt(2) == 'U' && token.charAt(0) != color) {
+				score--;
+			}
 		}
 
 		//if I  have as many or more soldiers than he does generals, increase my score
@@ -576,14 +596,12 @@ public class AI {
 
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
-	
-		String state = "B6D R6D R6D R3D B4D R4D B1D B2D B1D B4D R1D B1D R1D B3D R5D B5D R1U R1D R5D R7D B1D R2D B3D B2D B5U R2D B6D B7D R1D R4D B1D R3D . ";
-		
-		Game game = new Game(state);
+			
+		Game game = new Game();
 		
 		AI ai = new AI(game, Ecolor.RED);
 		
-//		String state = game.getBoard().saveBoard();
+		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);
 
 		System.out.println("\n\n");
