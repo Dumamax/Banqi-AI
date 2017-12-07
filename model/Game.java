@@ -387,6 +387,7 @@ public class Game {
 
 	public Ecolor getPlayerColor(String player){
 		
+		
 		if(player.equals(currentPlayer)){
 			return currentColor;
 		}else if(currentColor==Ecolor.RED){

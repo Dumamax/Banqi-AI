@@ -15,6 +15,7 @@ public class Token {
 	
 	public Type getType() {
 		return type;
+		
 	}
 	
 	public Ecolor getColor() {

@@ -137,6 +137,8 @@ public class GameBoard {
 		btnCancel.addActionListener(new ActionListener(){
 			public void actionPerformed(ActionEvent arg0){
 				frame.dispose();
+				
+				
 			}
 		});
 		btnCancel.setBounds(10, 835, 97, 25);

@@ -63,6 +63,7 @@ public final class TokenComponent {
 	}
 	
 	private String power(String type){
+		
 		switch(type) {
 		case "GENERAL": return "7";
 		case "ADVISOR": return "6";
