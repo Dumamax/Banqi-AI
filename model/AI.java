@@ -5,10 +5,13 @@ import java.util.Arrays;
 public class AI {
 	
 	Color color;
+
 	boolean debug = false;
+
 	
-	public AI(Color color) {
+	public AI(Game game, Color color) {
 		this.color = color;
+		this.game = game;
 	}
 	
 	
@@ -377,6 +380,95 @@ public class AI {
 		newState += " . " + graveyard;
 		//then return the newState onto which that move was made
 		return newState;
+	}
+
+	
+	public int[] negamax(String state, int depthLimit){
+		Double alpha = Double.NEGATIVE_INFINITY;
+		Double beta = Double.POSITIVE_INFINITY;
+		int bestScore = -1000;
+		int[] bestMove = new int[]{-1, -1, -1, -1};
+		
+		for (int depth=0; depth<depthLimit; depth++) {
+			//Recurssive Call
+			int[][] output = negamaxHelper(state, depth, alpha, beta);
+			int score = output[0][0];
+			int[] move = output[1];
+			
+			if(bestScore == -1000 || score > bestScore) {
+				bestScore = score;
+				bestMove = move;
+				if(game.isOver()) {
+					return bestMove;
+				}
+			}
+		}
+		return bestMove;
+	}
+	
+	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
+		int score = -1000;
+		int[] move = null;
+		int[][] output;
+		
+		if(game.isOver() || depthLeft == 0) {
+			score = calculateScore(state);
+			output[0][0] = score;
+			output[1] = move;
+			return output;
+		}
+		
+		int bestScore = -1000;
+		int[] bestMove = null;
+		int[][] allMoves = compileMoves(validMoves(state));
+		
+		for(int i=0; i<allMoves.length; i++) {
+			String newState = makeMove(allMoves[i], state);
+			
+			output = negamaxHelper(newState, depthLeft-1, -beta, -alpha);
+			score = output[0][0];
+			move = output[1];
+			if(score == -1000) {
+				continue;
+			}
+			score = -score;
+			if(bestScore == -1000 || score > bestScore) {
+				bestScore = score;
+				bestMove = move;
+			}
+			if(bestScore > alpha) {
+				alpha = (double) bestScore;
+			}
+			if(bestScore >= beta) {
+				break;
+			}
+		}
+		output[0][0] = bestScore;
+		output[1] = bestMove;
+	}
+	
+	private int[][] compileMoves(ArrayList<int[][]> validMoves){
+		int length = 0;
+		length += validMoves.get(0).length;
+		length += validMoves.get(1).length;
+		length += validMoves.get(2).length;
+		
+		int[][] allMoves = new int[length][4];
+		int x = 0;
+		for(int i=0; i<validMoves.get(0).length; i++) {
+			allMoves[x] = validMoves.get(0)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(1).length; i++) {
+			allMoves[x] = validMoves.get(1)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(2).length; i++) {
+			allMoves[x] = validMoves.get(2)[i];
+			x++;
+		}
+		
+		return allMoves;
 	}
 	
 	/**
