@@ -2,11 +2,11 @@
 public class Token {
 	
 	private Type type;
-	private Color color;
+	private Ecolor color;
 	private Status status;
 	private boolean isFaceUp;
 	
-	public Token(Type _type, Color _color) {
+	public Token(Type _type, Ecolor _color) {
 		type = _type;
 		color = _color;
 		status = Status.ACTIVE;
@@ -15,9 +15,10 @@ public class Token {
 	
 	public Type getType() {
 		return type;
+		
 	}
 	
-	public Color getColor() {
+	public Ecolor getColor() {
 		return color;
 	}
 	
@@ -40,9 +41,9 @@ public class Token {
 	public String abbreviate() {
 		String temp = "";
 		
-		if(color == Color.RED) {
+		if(color == Ecolor.RED) {
 			temp += "R";
-		}else if(color == Color.BLACK) {
+		}else if(color == Ecolor.BLACK) {
 			temp += "B";
 		}
 		

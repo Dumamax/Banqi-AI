@@ -4,23 +4,24 @@ import java.util.Arrays;
 
 public class AI {
 	
-	Color color;
+
+	Ecolor color;
 	Game game;
 
 	boolean debug = false;
 
 	
-	public AI(Game game, Color color) {
+	public AI(Game game, Ecolor color) {
 		this.color = color;
 		this.game = game;
 	}
 	
 	
-	public void setColor(Color color) {
+	public void setColor(Ecolor color) {
 		this.color = color;
 	}
 	
-	public Color getColor() {
+	public Ecolor getColor() {
 		return color;
 	}
 	
@@ -93,19 +94,19 @@ public class AI {
 	}
 	
 	private boolean correctColor(char thisLetter, char otherLetter) {
-		Color thisColor = null;
-		Color otherColor = null;
+		Ecolor thisColor = null;
+		Ecolor otherColor = null;
 		
 		if(thisLetter == 'R') {
-			thisColor = Color.RED;
+			thisColor = Ecolor.RED;
 		}else if(thisLetter == 'B') {
-			thisColor = Color.BLACK;
+			thisColor = Ecolor.BLACK;
 		}
 		
 		if(otherLetter == 'R') {
-			otherColor = Color.RED;
+			otherColor = Ecolor.RED;
 		}else if(otherLetter == 'B') {
-			otherColor = Color.BLACK;
+			otherColor = Ecolor.BLACK;
 		}
 		
 		if(thisColor == color) {
@@ -486,9 +487,9 @@ public class AI {
 	 * @param state The state of the board (including Field & Graveyard).
 	 * @return the score of the board for some playerColor. The higher the score, the better the board state is for that player.
 	 */
-	public Integer calculateScore(Color playerColor, String state) {
+	public Integer calculateScore(Ecolor playerColor, String state) {
 		char color = 'R';
-		if(playerColor == Color.BLACK) {
+		if(playerColor == Ecolor.BLACK) {
 			color = 'B';
 		}
 		
@@ -566,14 +567,15 @@ public class AI {
 	}
 	
 	public static void main(String[] args) {
+
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
-		
+	
 		String state = "B6D R6D R6D R3D B4D R4D B1D B2D B1D B4D R1D B1D R1D B3D R5D B5D R1U R1D R5D R7D B1D R2D B3D B2D B5U R2D B6D B7D R1D R4D B1D R3D . ";
 		
 		Game game = new Game(state);
 		
-		AI ai = new AI(game, Color.RED);
+		AI ai = new AI(game, Ecolor.RED);
 		
 //		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);
@@ -599,19 +601,19 @@ public class AI {
 			state = ai.makeMove(chosenMove, state);
 			
 			ai.printBoard("State:\n" + state);
-			System.out.println("Value for Red: " + ai.calculateScore(Color.RED, state));
-			redScores.add(ai.calculateScore(Color.RED, state));
-			System.out.println("Value for Black: " + ai.calculateScore(Color.BLACK, state));
-			blackScores.add(ai.calculateScore(Color.BLACK, state));
+			System.out.println("Value for Red: " + ai.calculateScore(Ecolor.RED, state));
+			redScores.add(ai.calculateScore(Ecolor.RED, state));
+			System.out.println("Value for Black: " + ai.calculateScore(Ecolor.BLACK, state));
+			blackScores.add(ai.calculateScore(Ecolor.BLACK, state));
 			
 			moveCounter++;
 			
 			System.out.println("\n\n");
 			
-			if(ai.getColor() == Color.RED) {
-				ai.setColor(Color.BLACK);
+			if(ai.getColor() == Ecolor.RED) {
+				ai.setColor(Ecolor.BLACK);
 			}else {
-				ai.setColor(Color.RED);
+				ai.setColor(Ecolor.RED);
 			}
 		}
 		
