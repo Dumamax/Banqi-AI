@@ -405,9 +405,19 @@ public class AI {
 				}
 			}
 		}
+		
+		//looks at the value of each state made by using each of the flips, choosing the flip that leads to the highest scoring state
 		int[][] flips = validMoves(state).get(1);
 		if(flips.length > 0 && (bestMove == null || (bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0))) {
-			bestMove = flips[new Random().nextInt(flips.length)];
+			bestMove = flips[0];
+			bestScore = 0;
+			for(int[] flip : flips) {
+				int tempScore = calculateScore(getColor(), makeMove(flip, state));
+				if(tempScore > bestScore) {
+					bestScore = tempScore;
+					bestMove = flip;
+				}
+			}
 		}
 		
 		if(bestMove[0] == 0 && bestMove[1] == 0 && bestMove[2] == 0 && bestMove[3] == 0) {
@@ -541,6 +551,16 @@ public class AI {
 				myGeneralCounter++;
 			}else if(token.charAt(1) == '7' && token.charAt(0) != color) {
 				hisGeneralCounter++;
+			}
+			
+			//face up tokens of mine are more valuable than face down tokens of mine
+			if(token.charAt(2) == 'U' && token.charAt(0) == color) {
+				score++;
+			}
+			
+			//face up tokens of my opponents is a bad thing
+			if(token.charAt(2) == 'U' && token.charAt(0) != color) {
+				score--;
 			}
 		}
 
