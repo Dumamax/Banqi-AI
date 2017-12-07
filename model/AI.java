@@ -5,10 +5,12 @@ import java.util.Arrays;
 public class AI {
 	
 	Color color;
+	Game game;
 	boolean debug = true;
 	
-	public AI(Color color) {
+	public AI(Game game, Color color) {
 		this.color = color;
+		this.game = game;
 	}
 	
 	
@@ -358,6 +360,34 @@ public class AI {
 		newState += graveyard;
 		//then return the newState onto which that move was made
 		return newState;
+	}
+
+	
+	public int[] negamax(String state, int depthLimit){
+		Double alpha = Double.NEGATIVE_INFINITY;
+		Double beta = Double.POSITIVE_INFINITY;
+		int bestScore = -100;
+		int[] bestMove = new int[]{-1, -1, -1, -1};
+		
+		for (int depth=0; depth<depthLimit; depth++) {
+			//Recurssive Call
+			int[][] output = negamaxHelper(state, depth, alpha, beta);
+			int score = output[0][0];
+			int[] move = output[1];
+			
+			if(bestScore == -100 || score > bestScore) {
+				bestScore = score;
+				bestMove = move;
+				if(game.isOver()) {
+					return bestMove;
+				}
+			}
+		}
+		return bestMove;
+	}
+	
+	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
+		
 	}
 	
 	public int[] pickBestMove(ArrayList<int[][]> allOptions, String state) {
