@@ -360,64 +360,14 @@ public class AI {
 		return newState;
 	}
 	
-	public int[] pickBestMove(ArrayList<int[][]> allOptions, String state) {
-		int[][] moves = allOptions.get(0);
-		int[][] flips = allOptions.get(1);
-		int[][] attacks = allOptions.get(2);
-		
-		//Check if it can attack
-		if(attacks.length > 0) {
-			int savedIndex = 0;
-			int savedScore = 0;
-			int score = 0;
-			
-			for(int i = 0; i < attacks.length; i++) {
-				score = calculateScore(attacks[i], state);
-				if(score > savedScore) {
-					savedIndex = i;
-					savedScore = score;
-				}
-			}
-			
-			//Make attack that has best score (1 layer deep)
-			return attacks[savedIndex];
-		}
-		
-		//If not, can it move towards a place to attack?
-		//TODO move towards better attack position
-		
-		//If not, check if it can flip
-			//Try to flip in a smart way
-		else if(flips.length > 0){
-			//TODO Make this section better
-			int rand = new Random().nextInt(flips.length);
-			return flips[rand];
-		}
-		
-		else {
-			int rand = new Random().nextInt(moves.length);
-			return moves[rand];
-		}
-		
-	}
-	
-
 	/**
-	 * For some given move, and some given state, it calculates the score of that state-move combination for use in traversing the tree later.
-	 * @param move A move is an integer array of 4 numbers: {x1, y1, x2, y2}.
-	 * @param state = "FIELD . GRAVEYARD"
-	 * @return the score of the move-state combination.
+	 * Returns the score of the board. The higher the score, the better the board is for the player recognized by playerColor.
+	 * @param playerColor The color of the player for whom it calculates the score.
+	 * @param state The state of the board (including Field & Graveyard).
+	 * @return the score of the board for some playerColor. The higher the score, the better the board state is for that player.
 	 */
-	public Integer calculateScore(int[] move, String state) {
-		String[] field = state.split(" . ")[0].split(" ");
-		String token1 = field[getIndex(move[0], move[1])];
-		String token2 = field[getIndex(move[2], move[3])];
-		
-		int rank1 = Character.getNumericValue(token1.charAt(1));
-		int rank2 = Character.getNumericValue(token2.charAt(1));
-		
-		//TODO More work can be done here to determine a balanced score
-		return rank2;
+	public Integer calculateScore(Color playerColor, String state) {
+		return null;
 	}
 	
 	public void printBoard(String state) {
@@ -438,9 +388,12 @@ public class AI {
 	
 	public static void main(String[] args) {
 		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
-		//String state = "B1U XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX . ";
 		AI ai = new AI(Color.RED);
 		ArrayList<int[][]> allOptions = ai.validMoves(state);
+		
+		for(int[] moveSet) {
+			
+		}
 		
 		int[] bestMove = ai.pickBestMove(allOptions, state);
 		System.out.println("Best Move:");
