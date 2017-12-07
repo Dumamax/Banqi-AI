@@ -276,7 +276,7 @@ public class Game {
 		
 		String[] split = state.split("\\.");
 		
-		System.out.println("split:" + Arrays.toString(split));
+		//System.out.println("split:" + Arrays.toString(split));
 		
 		String board = split[0];
 		String graveyard = split[1];
