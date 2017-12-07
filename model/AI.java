@@ -5,8 +5,9 @@ import java.util.Arrays;
 public class AI {
 	
 	Color color;
-	Game game;
-	boolean debug = true;
+
+	boolean debug = false;
+
 	
 	public AI(Game game, Color color) {
 		this.color = color;
@@ -16,6 +17,10 @@ public class AI {
 	
 	public void setColor(Color color) {
 		this.color = color;
+	}
+	
+	public Color getColor() {
+		return color;
 	}
 	
 	/**
@@ -341,23 +346,38 @@ public class AI {
 	 * @return null if the move was not valid, the new state created otherwise.
 	 */
 	public String makeMove(int[] move, String state) {	
-		String[] field = state.split(" . ")[0].split(" ");
-		String graveyard = state.split(" . ")[1];
+		String[] stateSplit = state.split(" . ");
+		String[] field = null;
+		String graveyard = null;
+
+		if(stateSplit.length == 2) {
+			field = stateSplit[0].split(" ");
+			graveyard = stateSplit[1];
+		}else {
+			field = stateSplit[0].split(" ");
+			graveyard = "";
+		}
 		int indexFirst = getIndex(move[0], move[1]);
-		char firstColor = field[indexFirst].charAt(0);
 		int indexSecond = getIndex(move[2], move[3]);
-		char secondColor = field[indexSecond].charAt(0);
+		
 		//make a newState
 		String newState = "";
-		//replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
-		//...and then replace the token at (move[0], move[1]) with XXX
-		field[indexSecond] = field[indexFirst];
-		field[indexFirst] = "XXX";
+		
+		if(move[0] == move[2] && move[1] == move[3]) {
+			//we are flipping, not moving
+			field[indexFirst] = field[indexFirst].substring(0, 2) + "U";
+		}else {
+			//replace the token at (move[2], move[3]) with the token that was at (move[0], move[1])...
+			//...and then replace the token at (move[0], move[1]) with XXX
+			field[indexSecond] = field[indexFirst];
+			field[indexFirst] = "XXX";
+		}
+		
 		//set everything up
 		for(String token : field) {
 			newState += token + " ";
 		}
-		newState += graveyard;
+		newState += " . " + graveyard;
 		//then return the newState onto which that move was made
 		return newState;
 	}
@@ -451,66 +471,75 @@ public class AI {
 		return allMoves;
 	}
 	
-	public int[] pickBestMove(ArrayList<int[][]> allOptions, String state) {
-		int[][] moves = allOptions.get(0);
-		int[][] flips = allOptions.get(1);
-		int[][] attacks = allOptions.get(2);
+	/**
+	 * Returns the score of the board. The higher the score, the better the board is for the player recognized by playerColor.
+	 * @param playerColor The color of the player for whom it calculates the score.
+	 * @param state The state of the board (including Field & Graveyard).
+	 * @return the score of the board for some playerColor. The higher the score, the better the board state is for that player.
+	 */
+	public Integer calculateScore(Color playerColor, String state) {
+		char color = 'R';
+		if(playerColor == Color.BLACK) {
+			color = 'B';
+		}
 		
-		//Check if it can attack
-		if(attacks.length > 0) {
-			int savedIndex = 0;
-			int savedScore = 0;
-			int score = 0;
+		//the score is the addition of all of the power levels of my tokens and the subtraction of all of the power levels of his tokens
+		String field = state.split(" . ")[0];
+		
+		Integer score = 0;
+		
+		int mySoldierCounter = 0;
+		int hisSoldierCounter = 0;
+		int myGeneralCounter = 0;
+		int hisGeneralCounter = 0;
+		
+		for(String token : field.split(" ")) {
+			//add to score the power level of my tokens
 			
-			for(int i = 0; i < attacks.length; i++) {
-				score = calculateScore(attacks[i], state);
-				if(score > savedScore) {
-					savedIndex = i;
-					savedScore = score;
-				}
+			if(token.equals("XXX")) {
+				continue;
 			}
 			
-			//Make attack that has best score (1 layer deep)
-			return attacks[savedIndex];
+			if(token.charAt(0) == color) {
+				score += Character.getNumericValue(token.charAt(1));
+			}
+			//subtract from score the power level of his tokens
+			if(token.charAt(0) != color) {
+				score -= Character.getNumericValue(token.charAt(1));
+			}
+			
+			//for each cannon of mine, increase my score and for each cannon of my opponent, decrease my score
+			if(token.charAt(1) == '2' && token.charAt(0) == color) {
+				score += 6;
+			}else if(token.charAt(1) == '2' && token.charAt(0) != color) {
+				score -= 6;
+			}
+			
+			if(token.charAt(1) == '1' && token.charAt(0) == color) {
+				mySoldierCounter++;
+			}else if(token.charAt(1) == '1' && token.charAt(0) != color) {
+				hisSoldierCounter++;
+			}
+			
+			if(token.charAt(1) == '7' && token.charAt(0) == color) {
+				myGeneralCounter++;
+			}else if(token.charAt(1) == '7' && token.charAt(0) != color) {
+				hisGeneralCounter++;
+			}
 		}
-		
-		//If not, can it move towards a place to attack?
-		//TODO move towards better attack position
-		
-		//If not, check if it can flip
-			//Try to flip in a smart way
-		else if(flips.length > 0){
-			//TODO Make this section better
-			int rand = new Random().nextInt(flips.length);
-			return flips[rand];
-		}
-		
-		else {
-			int rand = new Random().nextInt(moves.length);
-			return moves[rand];
-		}
-		
-	}
-	
 
-	/**
-	 * For some given move, and some given state, it calculates the score of that state-move combination for use in traversing the tree later.
-	 * @param move A move is an integer array of 4 numbers: {x1, y1, x2, y2}.
-	 * @param state = "FIELD . GRAVEYARD"
-	 * @return the score of the move-state combination.
-	 */
-	public Integer calculateScore(int[] move, String state) {
-		String[] field = state.split(" . ")[0].split(" ");
-		String token1 = field[getIndex(move[0], move[1])];
-		String token2 = field[getIndex(move[2], move[3])];
+		//if I  have as many or more soldiers than he does generals, increase my score
+		if(mySoldierCounter >= hisGeneralCounter) {
+			score += 15;
+		}
+		//if he has as many or more soldiers than i have generals, decrease my score
+		if(hisSoldierCounter >= myGeneralCounter) {
+			score -= 15;
+		}
 		
-		int rank1 = Character.getNumericValue(token1.charAt(1));
-		int rank2 = Character.getNumericValue(token2.charAt(1));
-		
-		//TODO More work can be done here to determine a balanced score
-		return rank2;
+		return score;
 	}
-	
+		
 	public void printBoard(String state) {
 		String[] splitState = state.split(" . ");
 		String field_raw = splitState[0];
@@ -528,14 +557,86 @@ public class AI {
 	}
 	
 	public static void main(String[] args) {
-		String state = "B1D R1D B2D R5D R3D R1D R5D R7D R3D B1D B6D B5D R1D B4D R2D B1D B2D B1D B3D R2D R1D R6D B7D R4D B4D B3U B5U R6U XXX B3D XXX R2U . B6U";
-		//String state = "B1U XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX . ";
-		AI ai = new AI(Color.RED);
-		ArrayList<int[][]> allOptions = ai.validMoves(state);
+		ArrayList<Integer> blackScores = new ArrayList<Integer>();
+		ArrayList<Integer> redScores = new ArrayList<Integer>();
 		
-		int[] bestMove = ai.pickBestMove(allOptions, state);
-		System.out.println("Best Move:");
-		System.out.println("[" + bestMove[0] + "," + bestMove[1] + " | " + bestMove[2] + "," + bestMove[3] + "]");
-		ai.printBoard(state);
+		AI ai = new AI(Color.RED);
+		
+		String state = new Game().getBoard().saveBoard();
+		ai.printBoard("State:\n" + state);
+		
+		System.out.println("\n\n");
+		
+		int moveCounter = 0;
+		while(state.split(" . ")[0].contains("R") && state.split(" . ")[0].contains("B")) {
+			ArrayList<int[][]> moves = ai.validMoves(state);
+			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+						
+			while(chosenMoves.length <= 0) {
+				moves.remove(chosenMoves);
+				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+			}
+			
+			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
+			
+			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
+			
+			state = ai.makeMove(chosenMove, state);
+			
+			ai.printBoard("State:\n" + state);
+			System.out.println("Value for Red: " + ai.calculateScore(Color.RED, state));
+			redScores.add(ai.calculateScore(Color.RED, state));
+			System.out.println("Value for Black: " + ai.calculateScore(Color.BLACK, state));
+			blackScores.add(ai.calculateScore(Color.BLACK, state));
+			
+			moveCounter++;
+			
+			System.out.println("\n\n");
+			
+			if(ai.getColor() == Color.RED) {
+				ai.setColor(Color.BLACK);
+			}else {
+				ai.setColor(Color.RED);
+			}
+		}
+		
+		String victor = "black";
+		if(state.split(" . ")[0].contains("R")) {
+			victor = "red";
+		}
+		
+		System.out.println("With " + moveCounter + " moves, " + victor + " is the victor!");
+		
+		ArrayList<Integer> newRedScores = new ArrayList<Integer>(redScores);
+		Integer lastScore = null;
+		for(Integer score : redScores) {
+			if(lastScore == null) {
+				lastScore = score;
+				continue;
+			}else {
+				if(lastScore == score) {
+					newRedScores.remove(lastScore);
+				}
+				lastScore = score;
+			}
+		}
+		
+		ArrayList<Integer> newBlackScores = new ArrayList<Integer>(blackScores);
+		lastScore = null;
+		for(Integer score : blackScores) {
+			if(lastScore == null) {
+				lastScore = score;
+				continue;
+			}else {
+				if(lastScore == score) {
+					newBlackScores.remove(lastScore);
+				}
+				lastScore = score;
+			}
+		}
+		
+		System.out.println("Red Scores:   " + newRedScores.toString());
+		System.out.println("Black Scores: " + newBlackScores.toString());
+		
 	}
 }
