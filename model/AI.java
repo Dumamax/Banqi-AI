@@ -6,6 +6,7 @@ public class AI {
 	
 
 	Ecolor color;
+	Game game;
 
 	boolean debug = false;
 
@@ -409,11 +410,11 @@ public class AI {
 	
 	public int[][] negamaxHelper(String state, int depthLeft, Double alpha, Double beta) {
 		int score = -1000;
-		int[] move = null;
-		int[][] output;
+		int[] move = new int[4];
+		int[][] output = new int[1][4];
 		
 		if(game.isOver() || depthLeft == 0) {
-			score = calculateScore(state);
+			score = calculateScore(color, state);
 			output[0][0] = score;
 			output[1] = move;
 			return output;
@@ -446,6 +447,7 @@ public class AI {
 		}
 		output[0][0] = bestScore;
 		output[1] = bestMove;
+		return output;
 	}
 	
 	private int[][] compileMoves(ArrayList<int[][]> validMoves){
@@ -562,24 +564,29 @@ public class AI {
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
 		ArrayList<Integer> redScores = new ArrayList<Integer>();
 		
-		AI ai = new AI(Ecolor.RED);
+
+		Game game = new Game();
 		
-		String state = new Game().getBoard().saveBoard();
+		AI ai = new AI(game, Ecolor.RED);
+		
+		String state = game.getBoard().saveBoard();
 		ai.printBoard("State:\n" + state);
-		
+
 		System.out.println("\n\n");
 		
 		int moveCounter = 0;
 		while(state.split(" . ")[0].contains("R") && state.split(" . ")[0].contains("B")) {
-			ArrayList<int[][]> moves = ai.validMoves(state);
-			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
-						
-			while(chosenMoves.length <= 0) {
-				moves.remove(chosenMoves);
-				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
-			}
+//			ArrayList<int[][]> moves = ai.validMoves(state);
+//			int[][] chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+//						
+//			while(chosenMoves.length <= 0) {
+//				moves.remove(chosenMoves);
+//				chosenMoves = moves.get((new Random()).nextInt(moves.size()));
+//			}
+//			
+//			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
 			
-			int[] chosenMove = chosenMoves[new Random().nextInt(chosenMoves.length)];
+			int[] chosenMove = ai.negamax(state, 5);
 			
 			System.out.println("Chosen move:\n" + Arrays.toString(chosenMove));
 			
