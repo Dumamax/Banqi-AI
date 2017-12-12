@@ -9,6 +9,7 @@ public class AI {
 	Game game;
 
 	boolean debug = false;
+	int nSteps = 0;
 
 	
 	public AI(Game game, Ecolor color) {
@@ -432,6 +433,7 @@ public class AI {
 		int score = -1000;
 		int[] move = new int[4];
 		int[][] output = new int[2][4];
+		nSteps++;
 		
 		if(game.isOver() || depthLeft == 0) {
 			score = calculateScore(color, state);
@@ -685,6 +687,7 @@ public class AI {
 		
 		System.out.println("Red Scores:   " + newRedScores.toString());
 		System.out.println("Black Scores: " + newBlackScores.toString());
+		System.out.println("Nodes Visited: " + ai.nSteps);
 		
 	}
 }
