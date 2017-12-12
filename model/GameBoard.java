@@ -77,7 +77,7 @@ public class GameBoard {
 		
 		try {
 			if(p2.equals("Q-Table")){
-				Q=ai.loadQ("qMap1Game.map");
+				Q=ai.loadQ("qMap1Game2.map");
 			}
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
@@ -91,7 +91,7 @@ public class GameBoard {
 			aiGame = new Game("R4D R2D R2D B1D R5D B1D B6D R1D B4D R7D R3D B6D B4D B3D R4D B1D B2D R6D B1D B3D B2D R1D B5D B1D R1D R3D B7D B5D R1D R1D R6D R5D . ");
 			aiGame.setPlayers(p1, p2);
 			aiGame.setCreatorColor(Ecolor.BLACK);
-			aiGame.setCurrentColor(Ecolor.BLACK);
+			aiGame.setCurrentColor(Ecolor.RED);
 
 			aiGame.setCurrentPlayer(p2);
 		}else{
