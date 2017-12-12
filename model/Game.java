@@ -1,5 +1,9 @@
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+
+import javafx.util.Pair;
 
 public class Game {
 
@@ -276,7 +280,7 @@ public class Game {
 		
 		String[] split = state.split("\\.");
 		
-		System.out.println("split:" + Arrays.toString(split));
+		//System.out.println("split:" + Arrays.toString(split));
 		
 		String board = split[0];
 		String graveyard = split[1];
@@ -397,4 +401,6 @@ public class Game {
 		}
 		
 	}
+
+	
 }

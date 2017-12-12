@@ -5,11 +5,16 @@ import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+
+import javafx.util.Pair;
 
 //import edu.colostate.cs.cs414.banqi.controller.Controller;
 //import edu.colostate.cs.cs414.banqi.model.AI;
@@ -27,12 +32,13 @@ public class GameBoard {
 	private String user;
 	private AI aiPlayer;
 	
-	private static int P1;
-	private static int P2;
+	private static String P1;
+	private static String P2;
 	
 	private int posX;
 	private int posY;
 	private static boolean testing= false;
+	private static Map<Pair<String,String>, Double> Q = new HashMap<Pair<String,String>, Double>();
 	
 	
 	//testing AI main
@@ -61,16 +67,42 @@ public class GameBoard {
 		});
 	}
 	
-	public static void main(int p1, int p2) {
+	public static void main(String p1, String p2) {
 		P1=p1;
 		P2=p2;
 		
-		Game aiGame= new Game();
-		String tUser = "Tester";
-		aiGame.setPlayers(tUser, "AI");
-		aiGame.setCreatorColor(Ecolor.RED);
-		aiGame.setCurrentColor(Ecolor.RED);
-		aiGame.setCurrentPlayer(tUser);
+		Game aiGame;
+		
+		AI ai= new AI();
+		
+		try {
+			if(p2.equals("Q-Table")){
+				Q=ai.loadQ("qMap1Game.map");
+			}
+		} catch (ClassNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		if(P2.equals("Q-Table")){
+			aiGame = new Game("R4D R2D R2D B1D R5D B1D B6D R1D B4D R7D R3D B6D B4D B3D R4D B1D B2D R6D B1D B3D B2D R1D B5D B1D R1D R3D B7D B5D R1D R1D R6D R5D . ");
+			aiGame.setPlayers(p1, p2);
+			aiGame.setCreatorColor(Ecolor.BLACK);
+			aiGame.setCurrentColor(Ecolor.BLACK);
+
+			aiGame.setCurrentPlayer(p2);
+		}else{
+			aiGame= new Game();
+			aiGame.setPlayers(p1, p2);
+			aiGame.setCreatorColor(Ecolor.RED);
+			aiGame.setCurrentColor(Ecolor.RED);
+
+			aiGame.setCurrentPlayer(p1);
+		}
+		
 		aiGame.setGameID("AI");
 		
 		testing = true;
@@ -80,7 +112,7 @@ public class GameBoard {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					GameBoard window = new GameBoard(aiGame, tUser);
+					GameBoard window = new GameBoard(aiGame, p1);
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -149,8 +181,10 @@ public class GameBoard {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {
-		if(game.getGameID().equals("AI")){
+		if(game.getGameID().equals("AI")&&game.getPlayers().get(1).equals("Negamax")){
 			aiPlayer = new AI(game,Ecolor.BLACK);
+		}else{
+			aiPlayer = new AI(game,Ecolor.RED);
 		}
 		frame = new JFrame(game.toString()+"---You are "+game.getPlayerColor(user)+isMyTurn());
 		frame.setBounds(posX, posY, 850, 939);
@@ -215,7 +249,7 @@ public class GameBoard {
 				JOptionPane.showMessageDialog(null, "The game is Over!\nThe winner is "+game.getWinningPlayer());
 				frame.dispose();
 			}
-			if(game.getCurrentPlayer().equals("AI")){
+			if(game.getCurrentPlayer().equals(P2)){
 				//System.out.println(game.getWinningPlayer());
 				if(game.isOver()){
 					JOptionPane.showMessageDialog(null, "The game is Over!\nThe winner is "+game.getWinningPlayer());
@@ -223,10 +257,16 @@ public class GameBoard {
 				}else{
 				
 					String gameState = game.getBoard().saveBoard();//This is where it gets an active game state, this will throw errors when using the AI test board
-					ArrayList<int[][]> moveArray = aiPlayer.validMoves(gameState);
-					aiPlayer.printBoard(gameState);
-					int[] bestMove = aiPlayer.negamax(gameState, 10);
-					game.moveToken("AI", bestMove[0], bestMove[1], bestMove[2], bestMove[3]);
+					//aiPlayer.printBoard(gameState);
+					int[] bestMove;
+					if(P2.equals("Negamax")){
+						bestMove = aiPlayer.negamax(gameState, 10);
+					}else if(P2.equals("Q-Table")){
+						bestMove = aiPlayer.Qmove(gameState, 'R', Q);
+					}else{
+						bestMove = new int[]{1,1,1,1};
+					}
+					game.moveToken(P2, bestMove[0], bestMove[1], bestMove[2], bestMove[3]);
 					
 					//board gets refreshed
 					GameBoard freshGameBoard = new GameBoard(game, user, (int) frame.getLocation().getX(), (int) frame.getLocation().getY());
