@@ -22,7 +22,7 @@ public class AI {
 	Ecolor color;
 	Game game;
 	
-	String mainQfile = "qMap1game2.map";
+	String mainQfile = "qMap1game.map";
 
 	boolean debug = false;
 

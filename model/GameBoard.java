@@ -70,14 +70,14 @@ public class GameBoard {
 	public static void main(String p1, String p2) {
 		P1=p1;
 		P2=p2;
-		
+		String qMapFileName="qMap1Game.map";
 		Game aiGame;
 		
 		AI ai= new AI();
 		
 		try {
 			if(p2.equals("Q-Table")){
-				Q=ai.loadQ("qMap1Game2.map");
+				Q=ai.loadQ(qMapFileName);
 			}
 		} catch (ClassNotFoundException e1) {
 			// TODO Auto-generated catch block
