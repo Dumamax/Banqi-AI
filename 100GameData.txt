@@ -1,0 +1,4 @@
+For 100
+starting map size of: 23859
+#format redWins:blackWins:winLossRatio:steps for every 100 games.
+1:0:1:80

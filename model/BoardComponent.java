@@ -109,17 +109,8 @@ public class BoardComponent extends JComponent {
                         if(game.getBoard().getToken(tileX+1, tileY+1)!=null){
                         
                         	if(game.moveToken(user, tileX+1, tileY+1, tileX2+1, tileY2+1)) {
-                        		if(game.getGameID().equals("AI")){
-                        			try {
-										Thread.sleep(1000);
-									} catch (InterruptedException e) {
-										// TODO Auto-generated catch block
-										e.printStackTrace();
-									}
-                        			parentGameBoard.refresh();
-                        		}else{
-                        			//Controller.updateGame(game);
-                        		}
+                        		
+                        		//not needed
                         	}
                         
                         }
@@ -131,6 +122,15 @@ public class BoardComponent extends JComponent {
 						}
                         
                         repaint();
+                        if(game.getGameID().equals("AI")){
+                			try {
+								Thread.sleep(1000);
+							} catch (InterruptedException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+                			parentGameBoard.refresh();
+                		}
 						
 					}
 				}

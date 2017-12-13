@@ -1,12 +1,28 @@
 import java.util.Random;
+
+import javafx.util.Pair;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AI {
 	
 
 	Ecolor color;
 	Game game;
+	
+	String mainQfile = "qMap1game.map";
 
 	boolean debug = false;
 
@@ -14,6 +30,10 @@ public class AI {
 	public AI(Game game, Ecolor color) {
 		this.color = color;
 		this.game = game;
+	}
+	
+	public AI(){
+		
 	}
 	
 	
@@ -592,6 +612,8 @@ public class AI {
 		}
 	}
 	
+	/**
+	
 	public static void main(String[] args) {
 
 		ArrayList<Integer> blackScores = new ArrayList<Integer>();
@@ -687,4 +709,699 @@ public class AI {
 		System.out.println("Black Scores: " + newBlackScores.toString());
 		
 	}
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	*/
+	
+	
+	//begin Qtable
+	
+	//test main comment out if not needed
+	public static void main(String[] args) throws IOException, ClassNotFoundException {
+		
+		Game game = new Game();
+		AI ai = new AI(game, Ecolor.RED);
+		
+		ai.Qtrials();
+	}
+	
+	
+	/**
+	 * 
+	 * save Qtable
+	 * @throws IOException 
+	 * 
+	 * citation: https://stackoverflow.com/questions/3347504/how-to-read-and-write-a-hashmap-to-a-file
+	 * 
+	 */
+	private void saveQ(Map<Pair<String, String>, Double> qMap, String fileName) throws IOException{
+		File file = new File(fileName);
+		FileOutputStream f = new FileOutputStream(file,false);
+		ObjectOutputStream s = new ObjectOutputStream(f);
+		s.writeObject(qMap);
+		s.flush();
+	}
+	
+	/**
+	 * load Qtable
+	 * 
+	 * citation: https://stackoverflow.com/questions/3347504/how-to-read-and-write-a-hashmap-to-a-file
+	 * @throws IOException 
+	 * @throws ClassNotFoundException 
+	 * 
+	 */
+	public Map<Pair<String, String>, Double> loadQ(String fileName) throws IOException, ClassNotFoundException{
+		
+		File file = new File(fileName);
+		FileInputStream f = new FileInputStream(file);
+		ObjectInputStream s = new ObjectInputStream(f);
+		@SuppressWarnings("unchecked")
+		Map<Pair<String, String>, Double> qMap = (Map<Pair<String, String>, Double>)s.readObject();
+		s.close();
+		return qMap;
+	}
+	
+	/**
+	 * train
+	 */
+	private void trainQ(int numGames, double learningRate, double epsilonDecayFactor, Game game){
+		int redW=0;
+		int blackW=0;
+		String data="For "+numGames+"\n";
+		boolean space=true;
+		double rho = learningRate;
+		String mapFileName = mainQfile;
+		Map<Pair<String,String>, Double> Q = new HashMap<Pair<String,String>, Double>();
+		try {
+			Q=loadQ(mapFileName);
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			System.out.println("class Not found!");
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("File: "+mapFileName+" not found.");
+			e.printStackTrace();
+		}
+		double epsilon = epsilonDecayFactor;
+		boolean done=false;
+		
+		data+="starting map size of: "+Q.size()+"\n";
+		data+="#format redWins:blackWins:winLossRatio:steps for every 100 games.\n";
+		
+		//play many games
+		for(int i=0;i<numGames;i++){
+			char Qcolor='R';
+			char nmColor='B';
+			epsilon *= epsilonDecayFactor;
+			//Game mainGame = new Game();
+			String state = game.getBoard().saveBoard();
+			int step=0;
+			
+			//play a game
+			while(!gameOver(state)){
+				step++;
+				String stateNew= new String(state);
+				
+				ArrayList<int[][]> validMovesList = validMovesColor(state,Qcolor);
+				int[][] allMoves = compileAllMoves(validMovesList);
+				//int[][] allMoves = qValidMoves(state,Qcolor);
+				
+				if(allMoves.length==0){
+					break;
+				}
+				
+				int[] move = epsilonGreedy(epsilon, Q, state, Qcolor, allMoves);
+				String stateOld=state;
+				int[] moveOld=move;
+				stateNew=makeMove(move,stateNew);
+				if(!Q.containsKey(makeStateMovePair(state,move))){
+					Q.put(makeStateMovePair(state,move), 0.0);
+				}
+				Q.put(makeStateMovePair(state,move), Q.get(makeStateMovePair(state,move))+(double) score('R',stateNew));
+				
+				int[] nmMove=negamax(state,4);
+				stateNew = makeMove(nmMove,stateNew);
+				Q.put(makeStateMovePair(state,move), rho * (Q.get(makeStateMovePair(state,move))+(double)score('R',stateNew)) );
+				if(step>1){
+					Q.put(makeStateMovePair(stateOld,moveOld), Q.get(makeStateMovePair(stateOld,moveOld))+(rho * (Q.get(makeStateMovePair(state,move))-Q.get(makeStateMovePair(stateOld,moveOld))) ));
+				}
+				
+				state=stateNew;
+				
+				
+			}
+			//printBoard(state);
+			if(space){
+				//printBoard(state);
+				System.out.println(" "+winner);
+				space=false;
+			}else{
+				//printBoard(state);
+				System.out.println(winner);
+				space=true;
+			}
+			if(winner.equals("red")){
+				redW++;
+			}else{
+				blackW++;
+			}
+			if(i%100==0&&i!=0){
+				data+=redW+":"+blackW+":"+redW/(redW+blackW)+":"+step+"\n";
+				redW=0;
+				blackW=0;
+				System.out.println(numGames-i+" games remaining.");
+			}
+			
+		}
+		
+		try {
+			saveQ(Q,mapFileName);
+			saveData(data,numGames+"GameData.txt");
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Could not make file: "+mapFileName);
+			e.printStackTrace();
+		}
+		
+		
+	}
+	
+	private Pair<String, String> makeStateMovePair(String state, int[] move){
+		String sMove="";
+		for(int i=0;i<move.length;i++){
+			sMove+=move[i];
+		}
+		
+		
+		return new Pair<String, String>(state,sMove);
+	}
+	
+	private String winner;
+	
+	private boolean gameOver(String state){
+		int red=0;
+		int black=0;
+		String field = state.split(" . ")[0];
+		for(String token : field.split(" ")) {
+			if(token.equals("XXX")) {
+				continue;
+			}
+			if(token.charAt(0) == 'R') {
+				red++;
+			}
+			if(token.charAt(0) == 'B') {
+				black++;
+			}
+		}
+		
+		if(red==0){
+			winner="black";
+			return true;
+		}else if(black==0){
+			winner="red";
+			return true;
+		}else{
+			return false;
+		}
+		
+		
+	}
+	
+	//begin epsilonGreedy
+	//returns one move
+	private int[] epsilonGreedy(double epsilon, Map<Pair<String, String>, Double> Q, String state, char color,int[][] allMoves){
+		Random random = new Random();
+		
+		//ArrayList<int[][]> validMovesList = validMovesColor(state,color);
+		//int[][] allMoves = compileAllMoves(validMovesList);
+		
+		//int[][] allMoves = qValidMoves(state, color);
+		
+		
+		
+		
+		
+		//System.out.println(allMoves.length);
+		if(allMoves.length==0){
+			printBoard(state);
+		}
+		
+		
+		
+		if(Math.random()<epsilon){
+			//int randomNumber = random.nextInt(max + 1 - min) + min;
+			int randomMove = random.nextInt(allMoves.length);
+			return allMoves[randomMove];
+			
+		}else{
+			int length = allMoves.length;
+			double[] Qscore= new double[length];
+			
+			for(int i=0;i<length;i++){
+				if(Q.containsKey(makeStateMovePair(state,allMoves[i]))){
+					Qscore[i]=Q.get(makeStateMovePair(state,allMoves[i]));
+				}else{
+					Qscore[i]=0;
+				}
+			}
+			
+			//find max index
+			double maxVal = Qscore[0];
+			int maxIndex = 0;
+			for(int i=0;i<length;i++){
+				if(Qscore[i]>maxVal){
+					maxVal=Qscore[i];
+					maxIndex=i;
+				}
+			}
+			return allMoves[maxIndex];	
+		}
+	}
+	//end epsilon greedy
+	
+	private int score(char color, String state){
+		int red=52;
+		int black=52;
+		String field = state.split(" . ")[0];
+		for(String token : field.split(" ")) {
+			if(token.equals("XXX")) {
+				continue;
+			}
+			if(token.charAt(0) == 'R') {
+				red-=(int)token.charAt(1);
+			}
+			if(token.charAt(0) == 'B') {
+				black-=(int)token.charAt(1);
+			}
+		}
+		if(color=='R'){
+			return black-red;
+		}else if(color=='B'){
+			return red-black;
+		}else{
+			return 0;
+		}
+	}
+	
+	public int[] Qmove(String state, char color, Map<Pair<String,String>, Double> Q){
+		
+		
+		Random random = new Random();
+		ArrayList<int[][]> validMovesList = validMovesColor(state,color);
+		int[][] allMoves = compileAllMoves(validMovesList);
+		//int[][] allMoves = qValidMoves(state,color);
+		int length = allMoves.length;
+		if(length==0){
+			System.out.println("allMoves=0!");
+		}
+		double[] Qscore= new double[length];
+		
+		for(int i=0;i<length;i++){
+			if(Q.containsKey(makeStateMovePair(state,allMoves[i]))){
+				Qscore[i]=Q.get(makeStateMovePair(state,allMoves[i]));
+			}else{
+				Qscore[i]=0;
+			}
+		}
+		
+		//find max index
+		double maxVal = Qscore[0];
+		int maxIndex = 0;
+		for(int i=0;i<length;i++){
+			if(Qscore[i]>maxVal){
+				maxVal=Qscore[i];
+				maxIndex=i;
+			}
+		}
+		if(maxVal==0){
+			System.out.println("Qmove makeing random move.");
+			int randomMove = random.nextInt(allMoves.length);
+			return allMoves[randomMove];
+		}else{
+			return allMoves[maxIndex];
+		}
+		
+		
+		
+		
+	}
+	
+	private void startMapFile(){
+
+		Map<Pair<String,String>, Double> Q = new HashMap<Pair<String,String>, Double>();
+		try {
+			saveQ(Q,mainQfile);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			System.out.println("Could not make map file.");
+			e.printStackTrace();
+		}
+	}
+	
+	private void saveData(String data, String fileName) throws IOException{
+		BufferedWriter out = null;
+		try {
+			out = new BufferedWriter(new FileWriter(fileName));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    try {
+			out.write(data);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	    out.close();
+	}
+	
+	private void testQ(){
+		
+	}
+	
+	
+	public void Qtrials() throws IOException, ClassNotFoundException{
+		//startMapFile();
+		
+		String masterState = "R4D R2D R2D B1D R5D B1D B6D R1D B4D R7D R3D B6D B4D B3D R4D B1D B2D R6D B1D B3D B2D R1D B5D B1D R1D R3D B7D B5D R1D R1D R6D R5D . ";
+		String mapFileName = "qMap1game.map";
+		
+		Game game = new Game(masterState);
+		
+		//System.out.println(game.getBoard().saveBoard());
+		
+		
+		trainQ(5000,0.2,.99999999999,game);
+		Map<Pair<String,String>, Double> Q = new HashMap<Pair<String,String>, Double>();
+		
+		Q=loadQ("qMap1game2.map");
+		
+		int[] move = {1,1,1,1};
+		
+		//Q.put(makeStateMovePair(masterState,move), 0.0);
+		
+		//saveQ(Q,mapFileName);
+		//System.out.println(Q);
+		System.out.println(Q.toString());
+		
+		
+		
+		
+		
+	}
+	
+	//end Qtable 
+	
+	
+	private int[][] moveSpace(int[] tokenPos){
+		int x = tokenPos[0];
+		int y = tokenPos[1];
+		
+		ArrayList<int[]> moves = new ArrayList<int[]>();
+		if(x>0){
+			int[] move ={x-1,y};
+			moves.add(move);
+		}
+		if(x<7){
+			int[] move ={x+1,y};
+			moves.add(move);
+		}
+		if(y>0){
+			int[] move = {x,y-1};
+			moves.add(move);
+		}
+		if(y<3){
+			int[] move = {x,y+1};
+			moves.add(move);
+		}
+		
+		//Integer[] arr = new Integer[al.size()];
+        //arr = al.toArray(arr);
+		
+		int[][] movesArr = new int[moves.size()][2];
+		movesArr = moves.toArray(movesArr);
+		
+		return movesArr;
+		
+	}
+	
+	private String[][] stateToGrid(String state){
+		String[][] gridState = new String[4][8];
+		String field = state.split(" . ")[0];
+		int index=0;
+		for(String token : field.split(" ")) {
+			gridState[index/8][index%8]=token;
+			index++;
+		}
+		
+		return gridState;
+	}
+	
+	//qValidMovesStart-------------------------------------------------------------------------------------------------------------------
+	private int[][] qValidMoves(String state, char color){
+		char oColor = 'B';
+		if(color==('B')){
+			oColor='R';
+		}
+		String[][] gridState=stateToGrid(state);
+		ArrayList<int[]> moves = new ArrayList<int[]>();
+		ArrayList<int[]> myTokens = new ArrayList<int[]>();
+		for(int y=0;y<4;y++){
+			for(int x=0;x<8;x++){
+				if(gridState[y][x].charAt(2)==('D')){
+					int[] move = {x+1,y+1,x+1,y+1};
+					moves.add(move);
+				}else if(gridState[y][x].charAt(2)==('U')&&gridState[y][x].charAt(0)==(color)){
+					int[] tokenPos ={x,y};
+					myTokens.add(tokenPos);
+				}
+			}
+		}
+		//go through each token and add possible valid moves
+		for(int[] tokenPos : myTokens){
+			String token = gridState[tokenPos[1]][tokenPos[0]];
+			char power = token.charAt(1);
+			int[][] moveSpace = moveSpace(tokenPos);
+			if(power==('1')){
+				//soldier
+				for(int[] pMove : moveSpace){
+					if(gridState[pMove[1]][pMove[0]].charAt(1)==('X')||(gridState[pMove[1]][pMove[0]].charAt(2)==('U')&&gridState[pMove[1]][pMove[0]].charAt(0)==oColor&&(int)gridState[pMove[1]][pMove[0]].charAt(1)==7)){
+						int[] move = {tokenPos[0]+1,tokenPos[1]+1,pMove[0]+1,pMove[1]+1};
+						moves.add(move);
+					}
+				}
+			}else if(power==('2')){
+				//cannon
+				//simple move
+				for(int[] pMove : moveSpace){
+					if(gridState[pMove[1]][pMove[0]].charAt(1)==('X')){
+						int[] move = {tokenPos[0]+1,tokenPos[1]+1,pMove[0]+1,pMove[1]+1};
+						moves.add(move);
+					}
+				}
+				//vertical attack down
+				if(tokenPos[1]<2){
+					int jumped =0;
+					int y=tokenPos[1];
+					y++;
+					while(y<=3){
+						if(gridState[y][tokenPos[0]].charAt(2)!=('X')){
+							if(jumped==1&&gridState[y][tokenPos[0]].charAt(2)==('U')&&gridState[y][tokenPos[0]].charAt(0)==oColor){
+								int[] move = {tokenPos[0]+1,tokenPos[1]+1,tokenPos[0]+1,y+1};
+								moves.add(move);
+							}
+							jumped++;
+						}
+						y++;
+					}	
+				}
+				//vertical attack up
+				if(tokenPos[1]>1){
+					int jumped =0;
+					int y=tokenPos[1];
+					y--;
+					while(y>=0){
+						if(gridState[y][tokenPos[0]].charAt(2)!=('X')){
+							if(jumped==1&&gridState[y][tokenPos[0]].charAt(2)==('U')&&gridState[y][tokenPos[0]].charAt(0)==oColor){
+								int[] move = {tokenPos[0]+1,tokenPos[1]+1,tokenPos[0]+1,y+1};
+								moves.add(move);
+							}
+							jumped++;
+						}
+						y--;
+					}
+				}
+				//horizontal attack right
+				if(tokenPos[0]<6){
+					int jumped=0;
+					int x=tokenPos[0];
+					x++;
+					while(x<=7){
+						if(gridState[tokenPos[1]][x].charAt(2)==('X')){
+							if(jumped==1&&gridState[tokenPos[1]][x].charAt(2)==('U')&&gridState[tokenPos[1]][x].charAt(0)==oColor){
+								int[] move = {tokenPos[0]+1,tokenPos[1]+1,x+1,tokenPos[1]+1};
+								moves.add(move);
+							}
+							jumped++;
+						}
+						x++;
+					}
+				}
+				
+				//horizontal attack left
+				if(tokenPos[0]>1){
+					int jumped=0;
+					int x=tokenPos[0];
+					x--;
+					while(x<=0){
+						if(gridState[tokenPos[1]][x].charAt(2)==('X')){
+							if(jumped==1&&gridState[tokenPos[1]][x].charAt(2)==('U')&&gridState[tokenPos[1]][x].charAt(0)==oColor){
+								int[] move = {tokenPos[0]+1,tokenPos[1]+1,x+1,tokenPos[1]+1};
+								moves.add(move);
+							}
+							jumped++;
+						}
+						x--;
+					}
+				}
+				
+			}else if(power==('7')){
+				//general
+				for(int[] pMove : moveSpace){
+					if(gridState[pMove[1]][pMove[0]].charAt(1)==('X')||(gridState[pMove[1]][pMove[0]].charAt(2)==('U')&&gridState[pMove[1]][pMove[0]].charAt(0)==oColor&&(int)gridState[pMove[1]][pMove[0]].charAt(1)>1)){
+						int[] move = {tokenPos[0]+1,tokenPos[1]+1,pMove[0]+1,pMove[1]+1};
+						moves.add(move);
+					}
+				}
+			}else{
+				//all others
+				for(int[] pMove : moveSpace){
+					if(gridState[pMove[1]][pMove[0]].charAt(1)==('X')||(gridState[pMove[1]][pMove[0]].charAt(2)==('U')&&gridState[pMove[1]][pMove[0]].charAt(0)==oColor&&(int)gridState[pMove[1]][pMove[0]].charAt(1)<=(int)power)){
+						int[] move = {tokenPos[0]+1,tokenPos[1]+1,pMove[0]+1,pMove[1]+1};
+						moves.add(move);
+					}
+				}
+				
+			}
+		}
+		
+		
+		int[][] movesArr = new int[moves.size()][4];
+		movesArr = moves.toArray(movesArr);
+		
+		return movesArr;
+	}
+	
+	
+	//qValidMovesEnd
+	
+	//new valid moves
+	/**
+	 * For some given string state, returns a list of all moves possible. A move is an integer array of 4 numbers: {x1, y1, x2, y2}.
+	 * @param state = "FIELD . GRAVEYARD"
+	 * @return An ArrayList containing moves[][], flips[][], and attacks[][]
+	 */
+	public ArrayList<int[][]> validMovesColor(String state,char color){
+		ArrayList<int[]> moves = new ArrayList<int[]>();
+		ArrayList<int[]> flips = new ArrayList<int[]>();
+		ArrayList<int[]> attacks = new ArrayList<int[]>();
+		
+		//first, split the field/graveyard and then the tokens themselves
+		String[] splitState = state.split(" . ");
+		String field_raw = splitState[0];
+		String[] field = field_raw.split(" ");
+		
+		//then, add the moves of flipping all tokens
+		if(debug) System.out.println("Valid Flips:");
+		for(int c=0;c<field.length;c++) {
+			String token = field[c];
+			if(token.charAt(2) == ('D')) {
+				int[] xy = getXY(c);
+				flips.add(new int[] {xy[0], xy[1], xy[0], xy[1]});
+				if(debug) System.out.println("[" + xy[0] + "," + xy[1] + " | " + xy[0] + "," + xy[1] + "]");
+			}
+		}
+		
+		if(debug) System.out.println("Valid Moves:");
+		for(int i=0; i<field.length; i++) {
+			String token = field[i];
+			
+			if(token.charAt(2) == ('U')&&token.charAt(0) ==color) {
+				int[] xy = getXY(i);
+				int x = xy[0];
+				int y = xy[1];
+				
+				//Cannon
+				if(token.charAt(1) == '2') {
+					for(int cannonX=1; cannonX<9; cannonX++) {
+						checkCannon(attacks, field, token, x, y, cannonX, y);
+					}
+					for(int cannonY=1; cannonY<5; cannonY++) {
+						checkCannon(attacks, field, token, x, y, x, cannonY);
+					}
+					
+					checkDirectionCannon(moves, attacks, field, token, x, y, x, y+1);
+					checkDirectionCannon(moves, attacks, field, token, x, y, x, y-1);
+					checkDirectionCannon(moves, attacks, field, token, x, y, x-1, y);
+					checkDirectionCannon(moves, attacks, field, token, x, y, x+1, y);
+				}
+				//General
+				else if(token.charAt(1) == '7') {
+					checkDirectionGeneral(moves, attacks, field, token, x, y, x, y+1);
+					checkDirectionGeneral(moves, attacks, field, token, x, y, x, y-1);
+					checkDirectionGeneral(moves, attacks, field, token, x, y, x-1, y);
+					checkDirectionGeneral(moves, attacks, field, token, x, y, x+1, y);
+				}
+				//Soldier
+				else if(token.charAt(1) == '1') {
+					checkDirectionSoldier(moves, attacks, field, token, x, y, x, y+1);
+					checkDirectionSoldier(moves, attacks, field, token, x, y, x, y-1);
+					checkDirectionSoldier(moves, attacks, field, token, x, y, x-1, y);
+					checkDirectionSoldier(moves, attacks, field, token, x, y, x+1, y);
+				}else {
+					checkDirection(moves, attacks, field, token, x, y, x, y+1);
+					checkDirection(moves, attacks, field, token, x, y, x, y-1);
+					checkDirection(moves, attacks, field, token, x, y, x-1, y);
+					checkDirection(moves, attacks, field, token, x, y, x+1, y);
+				}
+			}
+		}
+		
+		//then turn out data into an actual output as expected
+		int[][] allMoves = new int[moves.size()][4];
+		int[][] allFlips = new int[flips.size()][4];
+		int[][] allAttacks = new int[attacks.size()][4];
+
+		int counter = 0;
+		for(int[] move : moves) {
+			allMoves[counter] = move;
+			counter++;
+		}
+		
+		counter = 0;
+		for(int[] flip : flips) {
+			allFlips[counter] = flip;
+			counter++;
+		}
+		
+		counter = 0;
+		for(int[] attack : attacks) {
+			allAttacks[counter] = attack;
+			counter++;
+		}
+		
+		ArrayList<int[][]> output = new ArrayList<int[][]>();
+		output.add(allMoves);
+		output.add(allFlips);
+		output.add(allAttacks);
+		return output;
+	}
+	
+	//compile all moves
+	private int[][] compileAllMoves(ArrayList<int[][]> validMoves){
+		int length = 0;
+		length += validMoves.get(0).length;
+		length += validMoves.get(1).length;
+		length += validMoves.get(2).length;
+		
+		int[][] allMoves = new int[length][4];
+		int x = 0;
+		for(int i=0; i<validMoves.get(0).length; i++) {
+			allMoves[x] = validMoves.get(0)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(1).length; i++) {
+			allMoves[x] = validMoves.get(1)[i];
+			x++;
+		}
+		for(int i=0; i<validMoves.get(2).length; i++) {
+			allMoves[x] = validMoves.get(2)[i];
+			x++;
+		}
+		
+		return allMoves;
+	}
+	
+	
 }
